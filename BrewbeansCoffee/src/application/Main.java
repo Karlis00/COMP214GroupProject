@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -23,11 +24,21 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 
+import java.sql.*;
+
+
+
 public class Main extends Application {
+	static final String DRIVER = "oracle.jdbc.OracleDriver";
+	static final String DATABASE_URL = "jdbc:oracle:thin:@ 199.212.26.208:1521:SQLD";
 	public String currentPage = "";
 	//create the pane
 	GridPane pane = new GridPane();
 	GridPane mainPane = new GridPane();		
+	
+	   Connection connection = null; // manages connection
+	   Statement statement = null; // query statement
+	   ResultSet resultSet = null; // manages results
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -35,7 +46,16 @@ public class Main extends Application {
 		try {
 			
 
+			   
+			   // load the driver class
+			   Class.forName( DRIVER );
+
+			   // establish connection to database                              
+			   connection =                                                     
+			   DriverManager.getConnection( DATABASE_URL, "COMP214_F22_er_53", "password" );
 			
+
+			      
 			//loop for the column to set width
 			    RowConstraints rowBanner = new RowConstraints();
 			    rowBanner.setPrefHeight(200);
@@ -160,10 +180,43 @@ public class Main extends Application {
 
 	private void runShowProduct() {
 		mainPane.getChildren().clear();
-
-		Label lblCoffeeDummy = new Label("Coffee");
-		mainPane.add(lblCoffeeDummy, 0, 0);
 		
+
+		   try {
+			// create Statement for querying database
+			statement = connection.createStatement();
+		
+			//String query
+			String query = "Select * from BB_PRODUCT";
+			// query database                                        
+			resultSet = statement.executeQuery(query);
+			ResultSetMetaData metaData = resultSet.getMetaData();
+		    int numberOfColumns = metaData.getColumnCount();
+		    String displayHeader = "";
+		    String displayText = "";
+			for ( int i = 1; i <= numberOfColumns; i++ )
+		         displayHeader += metaData.getColumnName( i ) + " \n";
+
+		      
+		      while ( resultSet.next() ) 
+		      {
+		         for ( int i = 1; i <= numberOfColumns; i++ )
+		        	 displayText += resultSet.getObject( i ) + " \n";
+
+		      }
+			
+			
+			TextArea txtCoffeeProduct = new TextArea();
+			Label lblCoffeeDummy = new Label("Coffee");
+			mainPane.add(lblCoffeeDummy, 0, 0);
+			mainPane.add(txtCoffeeProduct, 0, 1);
+			txtCoffeeProduct.setText(displayHeader + displayText);
+			
+		   }
+		   catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	private void runEditProduct() {
@@ -176,14 +229,13 @@ public class Main extends Application {
 		mainPane.add(new Label ("Product Description: "), 0, 2);
 		TextField txtProductID = new TextField();
 		TextField txtProductName = new TextField();
-		TextField txtProductDescription = new TextField();
-		TextField txtImageFilename = new TextField();
+		TextArea txtProductDescription = new TextArea();
+		txtProductDescription.setWrapText(true);
 
 		mainPane.add(txtProductID, 1, 0);
 		mainPane.add(btnGetProduct, 2, 0);
 		mainPane.add(txtProductName, 1, 1);
 		mainPane.add(txtProductDescription, 1, 2);
-		mainPane.add(txtImageFilename, 1, 2);
 
 		mainPane.add(btnEdit, 1, 3);
 		btnGetProduct.setOnAction((event)->{});
@@ -201,7 +253,9 @@ public class Main extends Application {
 		mainPane.add(new Label ("Price: "), 0, 3);
 		mainPane.add(new Label ("Status: "), 0, 4);
 		TextField txtProductName = new TextField();
-		TextField txtProductDescription = new TextField();
+		TextArea txtProductDescription = new TextArea();
+		txtProductDescription.setWrapText(true);
+		
 		TextField txtImageFilename = new TextField();
 		TextField txtPrice = new TextField();
 		TextField txtStatus = new TextField();
