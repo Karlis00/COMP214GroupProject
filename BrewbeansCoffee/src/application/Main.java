@@ -189,9 +189,8 @@ public class Main extends Application {
 		   try {
 
 			   ListView<String> lstvCoffeeProduct = new ListView<String>();
-				Label lblCoffeeDummy = new Label("Coffee");
-				mainPane.add(lblCoffeeDummy, 0, 0);
-				mainPane.add(lstvCoffeeProduct, 0, 0);
+				mainPane.add(new Label("Coffee"), 0, 0);
+				mainPane.add(lstvCoffeeProduct, 0, 1);
 		
 			//String query
 			String query = "Select * from BB_PRODUCT";
