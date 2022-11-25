@@ -169,15 +169,49 @@ public class Main extends Application {
 	private void runEditProduct() {
 		mainPane.getChildren().clear();
 
-		Button btnEdit = new Button("Edit");
-		mainPane.add(btnEdit, 0, 0);		
+		Button btnEdit = new Button("Update Product");
+		Button btnGetProduct = new Button("Search by ID");
+		mainPane.add(new Label ("Product ID: "), 0, 0);
+		mainPane.add(new Label ("Product Name: "), 0, 1);
+		mainPane.add(new Label ("Product Description: "), 0, 2);
+		TextField txtProductID = new TextField();
+		TextField txtProductName = new TextField();
+		TextField txtProductDescription = new TextField();
+		TextField txtImageFilename = new TextField();
+
+		mainPane.add(txtProductID, 1, 0);
+		mainPane.add(btnGetProduct, 2, 0);
+		mainPane.add(txtProductName, 1, 1);
+		mainPane.add(txtProductDescription, 1, 2);
+		mainPane.add(txtImageFilename, 1, 2);
+
+		mainPane.add(btnEdit, 1, 3);
+		btnGetProduct.setOnAction((event)->{});
+		
+		btnEdit.setOnAction((event)->{});	
 	}
 
 	private void runAddProduct() {
 		mainPane.getChildren().clear();
-
+		
 		Button btnAdd = new Button("Add Product");
-		mainPane.add(btnAdd, 0, 0);
+		mainPane.add(new Label ("Product Name: "), 0, 0);
+		mainPane.add(new Label ("Product Description: "), 0, 1);
+		mainPane.add(new Label ("Image Filename: "), 0, 2);
+		mainPane.add(new Label ("Price: "), 0, 3);
+		mainPane.add(new Label ("Status: "), 0, 4);
+		TextField txtProductName = new TextField();
+		TextField txtProductDescription = new TextField();
+		TextField txtImageFilename = new TextField();
+		TextField txtPrice = new TextField();
+		TextField txtStatus = new TextField();
+		mainPane.add(txtProductName, 1, 0);
+		mainPane.add(txtProductDescription, 1, 1);
+		mainPane.add(txtImageFilename, 1, 2);
+		mainPane.add(txtPrice, 1, 3);
+		mainPane.add(txtStatus, 1, 4);
+		mainPane.add(btnAdd, 1, 5);
+		btnAdd.setOnAction((event)->{});
 		
 	}
 
