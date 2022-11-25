@@ -188,10 +188,10 @@ public class Main extends Application {
 
 		   try {
 
-				TextArea txtCoffeeProduct = new TextArea();
+			   ListView<String> lstvCoffeeProduct = new ListView<String>();
 				Label lblCoffeeDummy = new Label("Coffee");
 				mainPane.add(lblCoffeeDummy, 0, 0);
-				mainPane.add(txtCoffeeProduct, 0, 1);
+				mainPane.add(lstvCoffeeProduct, 0, 0);
 		
 			//String query
 			String query = "Select * from BB_PRODUCT";
@@ -208,9 +208,8 @@ public class Main extends Application {
     
 		      while ( resultSet.next() ) 
 		      {
-					txtCoffeeProduct.appendText(resultSet.getObject( 2 ) + " \n");
+		    	  lstvCoffeeProduct.getItems().add(resultSet.getObject( 2 ).toString());
 		      }
-			
 			
 
 
