@@ -25,6 +25,8 @@ import javafx.scene.image.ImageView;
 
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 
@@ -98,9 +100,9 @@ public class Main extends Application {
 			Button btnEditView = new Button("Edit Product");
 			Button btnShowView = new Button("Show Products");
 			Button btnBasketView = new Button("Shopping Basket");
-			Button btnOrderView = new Button("Order (Tax Calculation)");
+			Button btnOrderTaxView = new Button("Order (Tax Calculation)");
 			Button btnUpdateOrderView = new Button("Update Order");
-			Button[] menuBtns = new Button[] {btnAddView, btnEditView, btnShowView, btnBasketView, btnOrderView, btnUpdateOrderView};
+			Button[] menuBtns = new Button[] {btnEditView, btnAddView,  btnUpdateOrderView, btnOrderTaxView, btnShowView, btnBasketView};
 					
 			
 			
@@ -194,14 +196,14 @@ public class Main extends Application {
 		    int numberOfColumns = metaData.getColumnCount();
 		    String displayHeader = "";
 		    String displayText = "";
+		    List<String> displayProductName = new ArrayList<String>();
 			for ( int i = 1; i <= numberOfColumns; i++ )
 		         displayHeader += metaData.getColumnName( i ) + " \n";
 
 		      
 		      while ( resultSet.next() ) 
 		      {
-		         for ( int i = 1; i <= numberOfColumns; i++ )
-		        	 displayText += resultSet.getObject( i ) + " \n";
+		        	 displayProductName.add( resultSet.getObject( 2 ) + " \n");
 
 		      }
 			
@@ -210,7 +212,7 @@ public class Main extends Application {
 			Label lblCoffeeDummy = new Label("Coffee");
 			mainPane.add(lblCoffeeDummy, 0, 0);
 			mainPane.add(txtCoffeeProduct, 0, 1);
-			txtCoffeeProduct.setText(displayHeader + displayText);
+			txtCoffeeProduct.setText(displayHeader + displayProductName);
 			
 		   }
 		   catch (SQLException e) {
