@@ -188,33 +188,32 @@ public class Main extends Application {
 
 		   try {
 
-
+				TextArea txtCoffeeProduct = new TextArea();
+				Label lblCoffeeDummy = new Label("Coffee");
+				mainPane.add(lblCoffeeDummy, 0, 0);
+				mainPane.add(txtCoffeeProduct, 0, 1);
 		
 			//String query
 			String query = "Select * from BB_PRODUCT";
 			// query database                                        
 			resultSet = statement.executeQuery(query);
 			ResultSetMetaData metaData = resultSet.getMetaData();
-		    int numberOfColumns = metaData.getColumnCount();
-		    String displayHeader = "";
-		    String displayText = "";
-		    List<String> displayProductName = new ArrayList<String>();
-			for ( int i = 1; i <= numberOfColumns; i++ )
-		         displayHeader += metaData.getColumnName( i ) + " \n";
+//		    int numberOfColumns = metaData.getColumnCount();
+//		    String displayHeader = "";
+//		    String displayText = "";
 
-		      
+//			for ( int i = 1; i <= numberOfColumns; i++ )
+//		         displayHeader += metaData.getColumnName( i ) + " \n";
+//			String dealMsg = 
+    
 		      while ( resultSet.next() ) 
 		      {
-		        	 displayProductName.add( resultSet.getObject( 2 ) + " \n");
-
+					txtCoffeeProduct.appendText(resultSet.getObject( 2 ) + " \n");
 		      }
 			
 			
-			TextArea txtCoffeeProduct = new TextArea();
-			Label lblCoffeeDummy = new Label("Coffee");
-			mainPane.add(lblCoffeeDummy, 0, 0);
-			mainPane.add(txtCoffeeProduct, 0, 1);
-			txtCoffeeProduct.setText(displayHeader + displayProductName);
+
+
 			
 		   }
 		   catch (SQLException e) {
