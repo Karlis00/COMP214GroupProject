@@ -40,6 +40,7 @@ public class Main extends Application {
 	
 	   Connection connection = null; // manages connection
 	   Statement statement = null; // query statement
+	   CallableStatement cStatement = null; // callable query statement
 	   ResultSet resultSet = null; // manages results
 	
 	@Override
@@ -55,7 +56,8 @@ public class Main extends Application {
 			   // establish connection to database                              
 			   connection =                                                     
 			   DriverManager.getConnection( DATABASE_URL, "COMP214_F22_er_53", "password" );
-			
+				// create Statement for querying database
+			   statement = connection.createStatement();
 
 			      
 			//loop for the column to set width
@@ -185,8 +187,8 @@ public class Main extends Application {
 		
 
 		   try {
-			// create Statement for querying database
-			statement = connection.createStatement();
+
+
 		
 			//String query
 			String query = "Select * from BB_PRODUCT";
@@ -267,7 +269,20 @@ public class Main extends Application {
 		mainPane.add(txtPrice, 1, 3);
 		mainPane.add(txtStatus, 1, 4);
 		mainPane.add(btnAdd, 1, 5);
-		btnAdd.setOnAction((event)->{});
+		btnAdd.setOnAction((event)->{
+			try {
+				cStatement = connection.prepareCall("CALL prod_add_sp(?, ?, ?, ?, ?)");
+				cStatement.setString(1, txtProductName.getText());
+				cStatement.setString(2, txtProductDescription.getText());
+				cStatement.setString(3, txtImageFilename.getText());
+				cStatement.setDouble(4, Double.parseDouble(txtPrice.getText()));
+				cStatement.setInt(5, Integer.parseInt(txtStatus.getText()));
+				cStatement.executeQuery();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 		
 	}
 
