@@ -19,6 +19,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import java.io.FileInputStream;
 import javafx.scene.image.Image;
@@ -50,6 +52,8 @@ public class Main extends Application {
 	Statement statement = null; // query statement
 	CallableStatement cStatement = null; // callable query statement
 	ResultSet resultSet = null; // manages results
+	
+	String basketId = "";
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -109,16 +113,26 @@ public class Main extends Application {
 			Button[] menuBtns = new Button[] { btnEditView, btnAddView, btnUpdateOrderView, btnOrderTaxView,
 					btnShowView, btnBasketView, btnReport1View, btnReport2View };
 
+			Font font = Font.font("Regular", FontWeight.LIGHT, 12);
+			Font boldfont = Font.font("Regular", FontWeight.BOLD, 14);
+			
 			// allocate menu buttons into the menu
 			int menuRow = 1;
 			for (Button b : menuBtns) {
 				menuPane.add(b, 0, menuRow);
 				menuRow++;
-
+				
+				b.setFont(font);
 				b.setStyle(
-						"-fx-background-color: white; -fx-border-color: white; -fx-border-radius: 5; -fx-padding: 5");
+						"-fx-background-color: #ffffff; -fx-border-color: white; -fx-border-radius: 5; -fx-padding: 5");
 
 				b.setOnAction((event) -> {
+					
+					for (Button btn:menuBtns) {
+						btn.setFont(font);
+					}
+					
+					b.setFont(boldfont);
 					currentPage = b.getText();
 
 					switch (currentPage) {
@@ -129,10 +143,10 @@ public class Main extends Application {
 						runAddProduct();
 						break;
 					case TASK_3:
-						runUpdateOrder();
+						runTaxCal();
 						break;
 					case TASK_4:
-						runTaxCal();
+						runUpdateOrder();
 						break;
 					case TASK_5:
 						runShowProduct();
@@ -162,16 +176,36 @@ public class Main extends Application {
 
 	}
 
-	private void runUpdateOrder() {
+	private void runTaxCal() {
 		mainPane.getChildren().clear();
 
-		Button btnCal = new Button("Update Product");
+		Button btnCal = new Button("Calculate tax");
+
 		mainPane.add(new Label("Shopper's Statue: "), 0, 0);
 		mainPane.add(new Label("Backet Subtotal: "), 0, 1);
-		TextField txtStatue = new TextField();
+
+		ComboBox cbState = new ComboBox();
+		try {
+
+			String query = "Select * from bb_tax order by 1 desc";
+			resultSet = statement.executeQuery(query);
+			ResultSetMetaData metaData = resultSet.getMetaData();
+			while (resultSet.next()) {
+				cbState.getItems().add(resultSet.getString(2));
+			}
+
+			cbState.setValue(cbState.getItems().get(0) );
+
+		} catch (Exception e) {
+
+			cbState.getItems().addAll("VA", "NC", "SC");
+			cbState.setValue(cbState.getItems().get(0));
+		}
+		
+		
 		TextField txtBacket = new TextField();
 
-		mainPane.add(txtStatue, 1, 0);
+		mainPane.add(cbState, 1, 0);
 		mainPane.add(txtBacket, 1, 1);
 		mainPane.add(btnCal, 1, 3);
 
@@ -182,7 +216,7 @@ public class Main extends Application {
 
 			try {
 				cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
-				cStatement.setString(1, txtStatue.getText().trim().toUpperCase());
+				cStatement.setString(1, cbState.getValue().toString());
 				cStatement.setDouble(2, Double.parseDouble(txtBacket.getText()));
 				cStatement.registerOutParameter(3, Types.DOUBLE);
 				cStatement.executeQuery();
@@ -197,11 +231,40 @@ public class Main extends Application {
 
 	}
 
-	private void runTaxCal() {
+	private void runUpdateOrder() {
+
 		mainPane.getChildren().clear();
 
-		Button btnCalculate = new Button("Calculate");
-		mainPane.add(btnCalculate, 0, 0);
+		Button btnAdd = new Button("Update Order Status");
+		mainPane.add(new Label("Basket Id: "), 0, 0);
+		mainPane.add(new Label("Date: "), 0, 1);
+		mainPane.add(new Label("Shipper: "), 0, 2);
+		mainPane.add(new Label("Ship Number: "), 0, 3);
+
+		TextField txtBasketId = new TextField();
+		TextField txtDate = new TextField();
+		TextField txtShipper = new TextField();
+		TextField txtShipNumber = new TextField();
+		
+		mainPane.add(txtBasketId, 1, 0);
+		mainPane.add(txtDate, 1, 1);
+		mainPane.add(txtShipper, 1, 2);
+		mainPane.add(txtShipNumber, 1, 3);
+		
+		mainPane.add(btnAdd, 1, 5);
+		btnAdd.setOnAction((event) -> {
+			try {
+				cStatement = connection.prepareCall("CALL status_ship_sp(?, ?, ?, ?)");
+				cStatement.setString(1, txtBasketId.getText());
+				cStatement.setString(2, txtDate.getText());
+				cStatement.setString(3, txtShipper.getText());
+				cStatement.setString(4, txtShipNumber.getText());
+				cStatement.executeQuery();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 
 	}
 
