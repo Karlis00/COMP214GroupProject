@@ -34,10 +34,10 @@ public class Main extends Application {
 	public String currentPage = "";
 
 	static final String TASK_1 = "Task 1: Edit Product";
-	static final String TASK_2 = "Task 2: Add Product";
-	static final String TASK_3 = "Task 3: Update Order";
-	static final String TASK_4 = "Task 4: Order (Tax Calculation)";
-	static final String TASK_5 = "Task 5: Show Products";
+	static final String TASK_2 = "Task 2: Create Product";
+	static final String TASK_3 = "Task 3: Calculate Tax";
+	static final String TASK_4 = "Task 4: Update Order Status";
+	static final String TASK_5 = "Task 5: Add Item to Basket";
 	static final String TASK_6 = "Task 6: Shopping Basket";
 	static final String REPORT_1 = "Report 1: Show Items in Basket ";
 	static final String REPORT_2 = "Report 2: Calculating Total Spending";
@@ -66,7 +66,7 @@ public class Main extends Application {
 
 			// loop for the column to set width
 			RowConstraints rowBanner = new RowConstraints();
-			rowBanner.setPrefHeight(200);
+			rowBanner.setPrefHeight(100);
 			pane.getRowConstraints().add(rowBanner);
 			ColumnConstraints columnLeft = new ColumnConstraints();
 			columnLeft.setPrefWidth(300);
@@ -84,8 +84,8 @@ public class Main extends Application {
 
 			Image banner = new Image(new FileInputStream("./src/Banner.png"));
 			ImageView bannerView = new ImageView(banner);
-			bannerView.setFitHeight(130);
-			bannerView.setFitWidth(500);
+			bannerView.setFitHeight(65);
+			bannerView.setFitWidth(250);
 
 			pane.add(bannerView, 0, 0);
 
@@ -165,8 +165,35 @@ public class Main extends Application {
 	private void runUpdateOrder() {
 		mainPane.getChildren().clear();
 
-		Button btnUpdate = new Button("Update");
-		mainPane.add(btnUpdate, 0, 0);
+		Button btnCal = new Button("Update Product");
+		mainPane.add(new Label("Shopper's Statue: "), 0, 0);
+		mainPane.add(new Label("Backet Subtotal: "), 0, 1);
+		TextField txtStatue = new TextField();
+		TextField txtBacket = new TextField();
+
+		mainPane.add(txtStatue, 1, 0);
+		mainPane.add(txtBacket, 1, 1);
+		mainPane.add(btnCal, 1, 3);
+
+		Label txtResult = new Label();
+		mainPane.add(txtResult, 1, 4);
+
+		btnCal.setOnAction((event) -> {
+
+			try {
+				cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
+				cStatement.setString(1, txtStatue.getText().trim().toUpperCase());
+				cStatement.setDouble(2, Double.parseDouble(txtBacket.getText()));
+				cStatement.registerOutParameter(3, Types.DOUBLE);
+				cStatement.executeQuery();
+				txtResult.setText("Result: " + cStatement.getDouble(3));
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				txtResult.setText("Error: " + e.toString());
+
+			}
+		});
 
 	}
 
@@ -206,7 +233,7 @@ public class Main extends Application {
 			mainPane.add(lstvCoffeeProduct, 0, 1);
 
 			// String query
-			String query = "Select * from BB_PRODUCT";
+			String query = "Select * from BB_PRODUCT order by 1 desc";
 			// query database
 			resultSet = statement.executeQuery(query);
 			ResultSetMetaData metaData = resultSet.getMetaData();
