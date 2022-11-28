@@ -13,7 +13,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Model {
+public class DatabaseData {
 
 	static final String DRIVER = "oracle.jdbc.OracleDriver";
 	static final String DATABASE_URL = "jdbc:oracle:thin:@199.212.26.208:1521:SQLD";
@@ -23,7 +23,7 @@ public class Model {
 	CallableStatement cStatement = null; // callable query statement
 	ResultSet resultSet = null; // manages results
 
-	public Model() throws ClassNotFoundException, SQLException {
+	public DatabaseData() throws ClassNotFoundException, SQLException {
 		Class.forName(DRIVER);
 		connection = DriverManager.getConnection(DATABASE_URL, "COMP214_F22_er_53", "password");
 		statement = connection.createStatement();

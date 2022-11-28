@@ -50,12 +50,12 @@ public class Main extends Application {
 	GridPane mainPane = new GridPane();
 	Alert a = new Alert(AlertType.NONE);
 
-	Model model;
+	DatabaseData data;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// try block for exception
-		model = new Model();
+		data = new DatabaseData();
 
 		GridPane pane = new GridPane();
 
@@ -186,7 +186,7 @@ public class Main extends Application {
 				Double subtotal = Double.parseDouble(txtSubtotal.getText().trim());
 
 				a.setAlertType(AlertType.INFORMATION);
-				a.setHeaderText("Tax: " + model.getTaxCost(state, subtotal));
+				a.setHeaderText("Tax: " + data.getTaxCost(state, subtotal));
 				a.show();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -223,7 +223,7 @@ public class Main extends Application {
 		mainPane.add(new Label("Ship Number: "), 0, 3);
 
 		ComboBox cbBasketId = new ComboBox();
-		List<String> basketIdList = model.getBacketIdList();
+		List<String> basketIdList = data.getBacketIdList();
 		cbBasketId.getItems().addAll(basketIdList);
 		cbBasketId.setValue(basketIdList.isEmpty() ? "" : basketIdList.get(0));
 		// TextField txtBasketId = new TextField();
@@ -247,7 +247,7 @@ public class Main extends Application {
 		btnAdd.setOnAction((event) -> {
 			Date date = Date.valueOf(datepicker.getValue());
 			try {
-				model.updateProduct(cbBasketId.getValue().toString(), date, txtShipper.getText(),
+				data.updateProduct(cbBasketId.getValue().toString(), date, txtShipper.getText(),
 						txtShipNumber.getText());
 
 				a.setAlertType(AlertType.INFORMATION);
@@ -305,7 +305,7 @@ public class Main extends Application {
 		tableView.getColumns().add(column4);
 		tableView.getColumns().add(column5);
 
-		tableView.getItems().addAll(model.getItemByBasketId(basketId));
+		tableView.getItems().addAll(data.getItemByBasketId(basketId));
 
 		return tableView;
 	}
@@ -317,7 +317,7 @@ public class Main extends Application {
 		mainPane.add(new Label("Basket ID: "), 0, 0);
 
 		ComboBox cbBasketId = new ComboBox();
-		List<String> basketIdList = model.getBacketIdList();
+		List<String> basketIdList = data.getBacketIdList();
 		cbBasketId.getItems().addAll(basketIdList);
 
 		mainPane.add(cbBasketId, 1, 0);
@@ -345,7 +345,7 @@ public class Main extends Application {
 			} else {
 
 				try {
-					String msg = model.checkInStock(cbBasketId.getValue().toString());
+					String msg = data.checkInStock(cbBasketId.getValue().toString());
 
 					a.setAlertType(AlertType.INFORMATION);
 					a.setHeaderText(msg);
@@ -373,7 +373,7 @@ public class Main extends Application {
 		mainPane.add(new Label("Coffee"), 0, 0);
 		mainPane.add(lstvCoffeeProduct, 0, 1);
 
-		lstvCoffeeProduct.getItems().addAll(model.getProductList());
+		lstvCoffeeProduct.getItems().addAll(data.getProductList());
 	}
 
 	private void runEditProduct() {
@@ -434,7 +434,7 @@ public class Main extends Application {
 			Integer status = Integer.parseInt(txtStatus.getText());
 
 			try {
-				model.addProduct(productName, productDescription, filename, price, status);
+				data.addProduct(productName, productDescription, filename, price, status);
 
 				a.setAlertType(AlertType.INFORMATION);
 				a.setHeaderText("Update Success");
