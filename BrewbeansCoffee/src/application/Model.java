@@ -54,7 +54,14 @@ public class Model {
 			cStatement.executeQuery();
 			return cStatement.getDouble(3);
 	}
-	
+
+	public String checkInStock(String basketid) throws SQLException {
+			cStatement = connection.prepareCall("CALL ck_instock_sp(?,?)");
+			cStatement.setString(1, basketid);
+			cStatement.registerOutParameter(2, Types.VARCHAR);
+			cStatement.executeQuery();
+			return cStatement.getString(2);
+	}
 
 	public List<String> getStateList() {
 		List<String> array = new ArrayList<>();

@@ -199,9 +199,11 @@ BEGIN
     END LOOP;
 
     IF lv_flag_txt = 'Y' THEN
-        dbms_output.put_line('All items in stock!');
+        --dbms_output.put_line('All items in stock!');
+		p_msg:='All items in stock!';
     ELSIF lv_flag_txt = 'N' THEN
-        dbms_output.put_line('All items NOT in stock!');
+        --dbms_output.put_line('All items NOT in stock!');
+		p_msg:='All items NOT in stock!';
     END IF;
     COMMIT;
 END ck_instock_sp;

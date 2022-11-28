@@ -270,6 +270,33 @@ public class Main extends Application {
 	private void runReport1() {
 		mainPane.getChildren().clear();
 
+		Button btnAdd = new Button("Check In Stock");
+		mainPane.add(new Label("Basket ID: "), 0, 0);
+
+		ComboBox cbBasketId = new ComboBox();
+		List<String> basketIdList = model.getBacketIdList();
+		cbBasketId.getItems().addAll(basketIdList);
+		cbBasketId.setValue(basketIdList.isEmpty() ? "" : basketIdList.get(0));
+		
+		mainPane.add(cbBasketId, 1, 0);
+		mainPane.add(btnAdd, 1, 4);
+
+		btnAdd.setOnAction((event) -> {
+			try {
+				String msg = model.checkInStock(cbBasketId.getValue().toString());
+
+				a.setAlertType(AlertType.INFORMATION);
+				a.setHeaderText(msg);
+				a.show();
+			} catch (Exception e) {
+				e.printStackTrace();
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText(e.getMessage());
+				a.show();
+			}
+		});
+		
+
 	}
 
 	private void runReport2() {
