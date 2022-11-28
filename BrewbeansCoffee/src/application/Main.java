@@ -383,26 +383,35 @@ public class Main extends Application {
 	private void runReport2() {
 		mainPane.getChildren().clear();
 
-		Button btnList = new Button("List");
+		Button btnList = new Button("List All");
 		mainPane.add(new Label("Shopper ID: "), 0, 0);
 
-		ComboBox cbBasketId = new ComboBox();
+		ComboBox cbShopperId = new ComboBox();
 		List<String> shopperIdList = data.getShopperIdList();
 
-		cbBasketId.getItems().addAll(shopperIdList);
-		cbBasketId.getItems().add(0,"");
-		
-		mainPane.add(cbBasketId, 1, 0);
+		cbShopperId.getItems().addAll(shopperIdList);
+
+		mainPane.add(cbShopperId, 1, 0);
 		mainPane.add(btnList, 2, 0);
+
+		cbShopperId.setOnAction((event) -> {
+			try {
+				List<String> list = new ArrayList<>();
+				list.add(cbShopperId.getValue().toString());
+				mainPane.add(this.getSpendingTableView(list), 0, 1, 3, 1);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText(e.getMessage());
+				a.show();
+			}
+
+		});
 
 		btnList.setOnAction((event) -> {
 			try {
 				List<String> list = new ArrayList<>();
-				if (cbBasketId.getValue() == null || cbBasketId.getValue().toString().isBlank() ) {
-					list.addAll(shopperIdList);
-				} else {
-					list.add(cbBasketId.getValue().toString());
-				}
+				list.addAll(shopperIdList);
 				mainPane.add(this.getSpendingTableView(list), 0, 1, 3, 1);
 			} catch (Exception e) {
 				e.printStackTrace();
