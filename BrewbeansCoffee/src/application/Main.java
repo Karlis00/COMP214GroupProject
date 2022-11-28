@@ -12,7 +12,11 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -172,7 +176,7 @@ public class Main extends Application {
 
 		mainPane.add(txtState, 1, 0);
 		mainPane.add(new Text("(example: VA, NC, SC)"), 2, 0);
-		
+
 		mainPane.add(txtSubtotal, 1, 1);
 		mainPane.add(btnCal, 1, 3);
 
@@ -236,7 +240,7 @@ public class Main extends Application {
 		mainPane.add(datepicker, 1, 1);
 		mainPane.add(txtShipper, 1, 2);
 		mainPane.add(new Text("(max: 5 character)"), 2, 2);
-		
+
 		mainPane.add(txtShipNumber, 1, 3);
 		mainPane.add(btnAdd, 1, 4);
 
@@ -267,6 +271,45 @@ public class Main extends Application {
 
 	}
 
+	private TableView getBasketTableView(String basketId) throws SQLException {
+		TableView tableView = new TableView();
+		tableView.setEditable(true);
+		tableView.setMinWidth(400);
+
+//		TableColumn<BasketTableModel, String> column1 = new TableColumn<>("Basket Item ID");
+//		column1.setMinWidth(30);
+//		column1.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+		TableColumn<BasketTableModel, String> column2 = new TableColumn<>("Basket Item");
+		column2.setMinWidth(200);
+		column2.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+		TableColumn<BasketTableModel, String> column3 = new TableColumn<>("Quantity");
+		column3.setMinWidth(30);
+		column3.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+		TableColumn<BasketTableModel, String> column4 = new TableColumn<>("Price");
+		column4.setMinWidth(30);
+		column4.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+		TableColumn<BasketTableModel, String> column5 = new TableColumn<>("Stock");
+		column5.setMinWidth(30);
+		column5.setCellValueFactory(new PropertyValueFactory<>("stock"));
+
+		
+		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+		
+//		tableView.getColumns().add(column1);
+		tableView.getColumns().add(column2);
+		tableView.getColumns().add(column3);
+		tableView.getColumns().add(column4);
+		tableView.getColumns().add(column5);
+
+		tableView.getItems().addAll(model.getItemByBasketId(basketId));
+
+		return tableView;
+	}
+
 	private void runReport1() {
 		mainPane.getChildren().clear();
 
@@ -276,26 +319,45 @@ public class Main extends Application {
 		ComboBox cbBasketId = new ComboBox();
 		List<String> basketIdList = model.getBacketIdList();
 		cbBasketId.getItems().addAll(basketIdList);
-		cbBasketId.setValue(basketIdList.isEmpty() ? "" : basketIdList.get(0));
-		
+
 		mainPane.add(cbBasketId, 1, 0);
-		mainPane.add(btnAdd, 1, 4);
+		mainPane.add(btnAdd, 2, 0);
 
-		btnAdd.setOnAction((event) -> {
+		cbBasketId.setOnAction((event) -> {
 			try {
-				String msg = model.checkInStock(cbBasketId.getValue().toString());
-
-				a.setAlertType(AlertType.INFORMATION);
-				a.setHeaderText(msg);
-				a.show();
-			} catch (Exception e) {
+//				ListView<String> listview = new ListView<String>();
+//				listview.getItems().addAll(model.getItemByBasketId(cbBasketId.getValue().toString()));
+				mainPane.add(getBasketTableView(cbBasketId.getValue().toString()), 0, 1, 3, 1);
+			} catch (SQLException e) {
 				e.printStackTrace();
 				a.setAlertType(AlertType.ERROR);
 				a.setHeaderText(e.getMessage());
 				a.show();
 			}
+
 		});
-		
+
+		btnAdd.setOnAction((event) -> {
+			if (cbBasketId.getValue() == null) {
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText("Please select a Backet ID");
+				a.show();
+			} else {
+
+				try {
+					String msg = model.checkInStock(cbBasketId.getValue().toString());
+
+					a.setAlertType(AlertType.INFORMATION);
+					a.setHeaderText(msg);
+					a.show();
+				} catch (Exception e) {
+					e.printStackTrace();
+					a.setAlertType(AlertType.ERROR);
+					a.setHeaderText(e.getMessage());
+					a.show();
+				}
+			}
+		});
 
 	}
 

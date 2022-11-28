@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,6 @@ public class Model {
 		statement = connection.createStatement();
 	}
 
-
 	public List<String> getBacketIdList() {
 		List<String> array = new ArrayList<>();
 		try {
@@ -47,20 +47,20 @@ public class Model {
 	}
 
 	public Double getTaxCost(String state, Double subtotal) throws SQLException {
-			cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
-			cStatement.setString(1, state);
-			cStatement.setDouble(2, subtotal);
-			cStatement.registerOutParameter(3, Types.DOUBLE);
-			cStatement.executeQuery();
-			return cStatement.getDouble(3);
+		cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
+		cStatement.setString(1, state);
+		cStatement.setDouble(2, subtotal);
+		cStatement.registerOutParameter(3, Types.DOUBLE);
+		cStatement.executeQuery();
+		return cStatement.getDouble(3);
 	}
 
 	public String checkInStock(String basketid) throws SQLException {
-			cStatement = connection.prepareCall("CALL ck_instock_sp(?,?)");
-			cStatement.setString(1, basketid);
-			cStatement.registerOutParameter(2, Types.VARCHAR);
-			cStatement.executeQuery();
-			return cStatement.getString(2);
+		cStatement = connection.prepareCall("CALL ck_instock_sp(?,?)");
+		cStatement.setString(1, basketid);
+		cStatement.registerOutParameter(2, Types.VARCHAR);
+		cStatement.executeQuery();
+		return cStatement.getString(2);
 	}
 
 	public List<String> getStateList() {
@@ -117,5 +117,21 @@ public class Model {
 		cStatement.setString(3, shipper);
 		cStatement.setString(4, shipNumber);
 		cStatement.executeQuery();
+	}
+
+	public List<BasketTableModel> getItemByBasketId(String basketId) throws SQLException {
+		List<BasketTableModel> array = new ArrayList<>();
+		String query = "select bb_basketitem.idbasketitem, bb_product.productname, bb_basketitem.quantity, bb_basketitem.price, bb_product.stock "
+				+ " from bb_basketitem "
+				+ "left join bb_product on bb_basketitem.idproduct = bb_product.idproduct "
+				+ "where bb_basketitem.idbasket = " + basketId + " order by 1 desc";
+
+		resultSet = statement.executeQuery(query);
+		resultSet.getMetaData();
+		while (resultSet.next()) {
+			array.add(new BasketTableModel(resultSet.getString(1), resultSet.getString(2),
+					resultSet.getString(3), resultSet.getString(4), resultSet.getString(5)));
+		}
+		return array;
 	}
 }
