@@ -1,17 +1,17 @@
 package application;
 
-public class BasketTableModel {
+public class TableModel {
 	private String id;
 	private String name;
 	private String quantity;
 	private String price;
 	private String stock;
 
-	public BasketTableModel() {
+	public TableModel() {
 		super();
 	}
 
-	public BasketTableModel(String id, String name, String quantity, String price, String stock) {
+	public TableModel(String id, String name, String quantity, String price, String stock) {
 		super();
 		this.id = id;
 		this.name = name;

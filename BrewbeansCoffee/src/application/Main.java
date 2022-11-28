@@ -30,6 +30,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.image.Image;
@@ -263,42 +264,29 @@ public class Main extends Application {
 
 	}
 
-	private void runShoppingBasket() {
-		mainPane.getChildren().clear();
-
-		Button btnCheck = new Button("Check Stock");
-		mainPane.add(btnCheck, 0, 0);
-
-	}
-
 	private TableView getBasketTableView(String basketId) throws SQLException {
 		TableView tableView = new TableView();
 		tableView.setEditable(true);
 		tableView.setMinWidth(400);
 
-//		TableColumn<BasketTableModel, String> column1 = new TableColumn<>("Basket Item ID");
-//		column1.setMinWidth(30);
-//		column1.setCellValueFactory(new PropertyValueFactory<>("id"));
-
-		TableColumn<BasketTableModel, String> column2 = new TableColumn<>("Basket Item");
+		TableColumn<TableModel, String> column2 = new TableColumn<>("Basket Item");
 		column2.setMinWidth(200);
 		column2.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		TableColumn<BasketTableModel, String> column3 = new TableColumn<>("Quantity");
+		TableColumn<TableModel, String> column3 = new TableColumn<>("Quantity");
 		column3.setMinWidth(30);
 		column3.setCellValueFactory(new PropertyValueFactory<>("quantity"));
 
-		TableColumn<BasketTableModel, String> column4 = new TableColumn<>("Price");
+		TableColumn<TableModel, String> column4 = new TableColumn<>("Price");
 		column4.setMinWidth(30);
 		column4.setCellValueFactory(new PropertyValueFactory<>("price"));
 
-		TableColumn<BasketTableModel, String> column5 = new TableColumn<>("Stock");
+		TableColumn<TableModel, String> column5 = new TableColumn<>("Stock");
 		column5.setMinWidth(30);
 		column5.setCellValueFactory(new PropertyValueFactory<>("stock"));
 
-		
 		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		
+
 //		tableView.getColumns().add(column1);
 		tableView.getColumns().add(column2);
 		tableView.getColumns().add(column3);
@@ -306,6 +294,37 @@ public class Main extends Application {
 		tableView.getColumns().add(column5);
 
 		tableView.getItems().addAll(data.getItemByBasketId(basketId));
+
+		return tableView;
+	}
+
+	private TableView getSpendingTableView(List<String> idList) throws SQLException {
+		List<TableModel> list = new ArrayList<>();
+		for (String id : idList) {
+			TableModel model = new TableModel();
+			model.setId(id);
+			model.setPrice(data.getSpendingByShopperId(id));
+			list.add(model);
+		}
+
+		TableView tableView = new TableView();
+		tableView.setEditable(true);
+		tableView.setMinWidth(300);
+
+		TableColumn<TableModel, String> column2 = new TableColumn<>("Shopper Id");
+		column2.setMinWidth(100);
+		column2.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+		TableColumn<TableModel, String> column4 = new TableColumn<>("Total Spending");
+		column4.setMinWidth(100);
+		column4.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+		tableView.getColumns().add(column2);
+		tableView.getColumns().add(column4);
+
+		tableView.getItems().addAll(list);
 
 		return tableView;
 	}
@@ -363,6 +382,35 @@ public class Main extends Application {
 
 	private void runReport2() {
 		mainPane.getChildren().clear();
+
+		Button btnList = new Button("List");
+		mainPane.add(new Label("Shopper ID: "), 0, 0);
+
+		ComboBox cbBasketId = new ComboBox();
+		List<String> shopperIdList = data.getShopperIdList();
+
+		cbBasketId.getItems().addAll(shopperIdList);
+		cbBasketId.getItems().add(0,"");
+		
+		mainPane.add(cbBasketId, 1, 0);
+		mainPane.add(btnList, 2, 0);
+
+		btnList.setOnAction((event) -> {
+			try {
+				List<String> list = new ArrayList<>();
+				if (cbBasketId.getValue() == null || cbBasketId.getValue().toString().isBlank() ) {
+					list.addAll(shopperIdList);
+				} else {
+					list.add(cbBasketId.getValue().toString());
+				}
+				mainPane.add(this.getSpendingTableView(list), 0, 1, 3, 1);
+			} catch (Exception e) {
+				e.printStackTrace();
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText(e.getMessage());
+				a.show();
+			}
+		});
 
 	}
 

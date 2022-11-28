@@ -45,6 +45,22 @@ public class DatabaseData {
 		}
 		return array;
 	}
+	public List<String> getShopperIdList() {
+		List<String> array = new ArrayList<>();
+		try {
+			String query = "Select idshopper from bb_shopper order by 1 desc";
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				array.add(resultSet.getString(1));
+			}
+			return array;
+		}
+
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return array;
+	}
 
 	public Double getTaxCost(String state, Double subtotal) throws SQLException {
 		cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
@@ -119,8 +135,8 @@ public class DatabaseData {
 		cStatement.executeQuery();
 	}
 
-	public List<BasketTableModel> getItemByBasketId(String basketId) throws SQLException {
-		List<BasketTableModel> array = new ArrayList<>();
+	public List<TableModel> getItemByBasketId(String basketId) throws SQLException {
+		List<TableModel> array = new ArrayList<>();
 		String query = "select bb_basketitem.idbasketitem, bb_product.productname, bb_basketitem.quantity, bb_basketitem.price, bb_product.stock "
 				+ " from bb_basketitem "
 				+ "left join bb_product on bb_basketitem.idproduct = bb_product.idproduct "
@@ -129,9 +145,19 @@ public class DatabaseData {
 		resultSet = statement.executeQuery(query);
 		resultSet.getMetaData();
 		while (resultSet.next()) {
-			array.add(new BasketTableModel(resultSet.getString(1), resultSet.getString(2),
+			array.add(new TableModel(resultSet.getString(1), resultSet.getString(2),
 					resultSet.getString(3), resultSet.getString(4), resultSet.getString(5)));
 		}
 		return array;
+	}
+	
+	public String getSpendingByShopperId(String shopperId) throws SQLException {
+
+		cStatement = connection.prepareCall("{? = call tot_purch_sf(?)}");
+		cStatement.registerOutParameter(1, Types.DECIMAL);
+		cStatement.setString(2, shopperId);
+		cStatement.execute();
+		return cStatement.getString(1);
+		
 	}
 }
