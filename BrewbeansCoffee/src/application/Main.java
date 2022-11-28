@@ -1,9 +1,15 @@
 package application;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -13,8 +19,15 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.io.FileInputStream;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -30,14 +43,18 @@ public class Main extends Application {
 	static final String REPORT_2 = "Report 2: Calculate Total Spending";
 
 	// create the pane
-	GridPane pane = new GridPane();
 	GridPane mainPane = new GridPane();
+	Alert a = new Alert(AlertType.NONE);
+
 	Model model;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// try block for exception
 		model = new Model();
+
+		GridPane pane = new GridPane();
+
 		RowConstraints rowBanner = new RowConstraints();
 		rowBanner.setPrefHeight(100);
 		pane.getRowConstraints().add(rowBanner);
@@ -51,6 +68,8 @@ public class Main extends Application {
 		// padding and setting gap
 		pane.setPadding(new Insets(10));
 		mainPane.setPadding(new Insets(30));
+		mainPane.setVgap(10);
+		mainPane.setHgap(10);
 
 		pane.setStyle("-fx-background-color: white");
 
@@ -63,12 +82,12 @@ public class Main extends Application {
 
 		GridPane menuPane = new GridPane();
 		pane.add(menuPane, 0, 1);
-		menuPane.setStyle("-fx-padding: 10 0 30 30; -fx-grid-lines-visible: true\");");
+		menuPane.setStyle("-fx-padding: 10 0 30 30");
 
 		pane.add(mainPane, 1, 1);
 
-//			//create menu buttons		
 		Label lblMenu = new Label("Menu");
+		lblMenu.setUnderline(true);
 
 		menuPane.add(lblMenu, 0, 3);
 		Button btnEditView = new Button(TASK_1);
@@ -82,7 +101,7 @@ public class Main extends Application {
 				btnReport1View, btnReport2View };
 
 		Font font = Font.font("Regular", FontWeight.LIGHT, 12);
-		Font boldfont = Font.font("Regular", FontWeight.BOLD, 14);
+		Font boldfont = Font.font("Regular", FontWeight.BOLD, 12);
 
 		// allocate menu buttons into the menu
 		int menuRow = 4;
@@ -113,7 +132,7 @@ public class Main extends Application {
 					runTaxCal();
 					break;
 				case TASK_4:
-					runUpdateOrder();
+					runUpdateStatus();
 					break;
 				case TASK_5:
 					runShowProduct();
@@ -130,7 +149,7 @@ public class Main extends Application {
 		}
 
 		// Create a scene and place it in the stage
-		Scene scene = new Scene(pane);
+		Scene scene = new Scene(pane, 1000, 500);
 		primaryStage.setTitle("BB Coffee");
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -142,29 +161,54 @@ public class Main extends Application {
 
 		Button btnCal = new Button("Calculate tax");
 
-		mainPane.add(new Label("Shopper's Statue: "), 0, 0);
-		mainPane.add(new Label("Backet Subtotal: "), 0, 1);
+		mainPane.add(new Label("State: "), 0, 0);
+		mainPane.add(new Label("Subtotal: "), 0, 1);
 
 		TextField txtState = new TextField();
+		this.addTextLimiter(txtState, 2);
 		TextField txtSubtotal = new TextField();
 
+		TextField txtShipNumber = new TextField();
+
 		mainPane.add(txtState, 1, 0);
+		mainPane.add(new Text("(example: VA, NC, SC)"), 2, 0);
+		
 		mainPane.add(txtSubtotal, 1, 1);
 		mainPane.add(btnCal, 1, 3);
 
-		Label txtResult = new Label();
-		mainPane.add(txtResult, 1, 4);
-
 		btnCal.setOnAction((event) -> {
-			String state = txtState.getText();
-			Double subtotal = Double.parseDouble(txtSubtotal.getText());
-			txtResult.setText("" + model.getTaxCost(state, subtotal));
+			try {
+				String state = txtState.getText().trim().toUpperCase();
+				Double subtotal = Double.parseDouble(txtSubtotal.getText().trim());
+
+				a.setAlertType(AlertType.INFORMATION);
+				a.setHeaderText("Tax: " + model.getTaxCost(state, subtotal));
+				a.show();
+			} catch (Exception e) {
+				e.printStackTrace();
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText(e.getMessage());
+				a.show();
+			}
 
 		});
 
 	}
 
-	private void runUpdateOrder() {
+	public static void addTextLimiter(final TextField tf, final int maxLength) {
+		tf.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(final ObservableValue<? extends String> ov, final String oldValue,
+					final String newValue) {
+				if (tf.getText().length() > maxLength) {
+					String s = tf.getText().substring(0, maxLength);
+					tf.setText(s);
+				}
+			}
+		});
+	}
+
+	private void runUpdateStatus() {
 
 		mainPane.getChildren().clear();
 
@@ -174,20 +218,43 @@ public class Main extends Application {
 		mainPane.add(new Label("Shipper: "), 0, 2);
 		mainPane.add(new Label("Ship Number: "), 0, 3);
 
-		TextField txtBasketId = new TextField();
-		TextField txtDate = new TextField();
+		ComboBox cbBasketId = new ComboBox();
+		List<String> basketIdList = model.getBacketIdList();
+		cbBasketId.getItems().addAll(basketIdList);
+		cbBasketId.setValue(basketIdList.isEmpty() ? "" : basketIdList.get(0));
+		// TextField txtBasketId = new TextField();
+
+		DatePicker datepicker = new DatePicker();
+		datepicker.setValue(LocalDate.now());
+		// txtDate = new TextField();
 		TextField txtShipper = new TextField();
+		this.addTextLimiter(txtShipper, 5);
+
 		TextField txtShipNumber = new TextField();
 
-		mainPane.add(txtBasketId, 1, 0);
-		mainPane.add(txtDate, 1, 1);
+		mainPane.add(cbBasketId, 1, 0);
+		mainPane.add(datepicker, 1, 1);
 		mainPane.add(txtShipper, 1, 2);
+		mainPane.add(new Text("(max: 5 character)"), 2, 2);
+		
 		mainPane.add(txtShipNumber, 1, 3);
+		mainPane.add(btnAdd, 1, 4);
 
-		mainPane.add(btnAdd, 1, 5);
 		btnAdd.setOnAction((event) -> {
-			model.updateProduct(txtBasketId.getText(), txtDate.getText(), txtShipper.getText(),
-					txtShipNumber.getText());
+			Date date = Date.valueOf(datepicker.getValue());
+			try {
+				model.updateProduct(cbBasketId.getValue().toString(), date, txtShipper.getText(),
+						txtShipNumber.getText());
+
+				a.setAlertType(AlertType.INFORMATION);
+				a.setHeaderText("Update Success");
+				a.show();
+			} catch (Exception e) {
+				e.printStackTrace();
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText(e.getMessage());
+				a.show();
+			}
 		});
 
 	}
@@ -268,6 +335,9 @@ public class Main extends Application {
 		mainPane.add(txtPrice, 1, 3);
 		mainPane.add(txtStatus, 1, 4);
 		mainPane.add(btnAdd, 1, 5);
+		Text message = new Text();
+		mainPane.add(message, 1, 6);
+
 		btnAdd.setOnAction((event) -> {
 
 			String productName = txtProductName.getText();
@@ -276,7 +346,13 @@ public class Main extends Application {
 			Double price = Double.parseDouble(txtPrice.getText());
 			Integer status = Integer.parseInt(txtStatus.getText());
 
-			model.addProduct(productName, productDescription, filename, price, status);
+			try {
+				model.addProduct(productName, productDescription, filename, price, status);
+				message.setText("Update success!");
+			} catch (SQLException e) {
+				e.printStackTrace();
+				message.setText(e.getMessage());
+			}
 		});
 
 	}

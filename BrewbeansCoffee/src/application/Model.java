@@ -2,6 +2,7 @@ package application;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -27,10 +28,38 @@ public class Model {
 		statement = connection.createStatement();
 	}
 
-	public List<String> getTaxList() {
+
+	public List<String> getBacketIdList() {
+		List<String> array = new ArrayList<>();
 		try {
-			List<String> array = new ArrayList<>();
-			String query = "Select * from bb_tax order by 1 desc";
+			String query = "Select idbasket from bb_basket order by 1 desc";
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				array.add(resultSet.getString(1));
+			}
+			return array;
+		}
+
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return array;
+	}
+
+	public Double getTaxCost(String state, Double subtotal) throws SQLException {
+			cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
+			cStatement.setString(1, state);
+			cStatement.setDouble(2, subtotal);
+			cStatement.registerOutParameter(3, Types.DOUBLE);
+			cStatement.executeQuery();
+			return cStatement.getDouble(3);
+	}
+	
+
+	public List<String> getStateList() {
+		List<String> array = new ArrayList<>();
+		try {
+			String query = "Select state from bb_tax order by 1 desc";
 			resultSet = statement.executeQuery(query);
 			while (resultSet.next()) {
 				array.add(resultSet.getString(2));
@@ -41,36 +70,18 @@ public class Model {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return array;
 	}
 
-	public Double getTaxCost(String state, Double subtotal) {
-		try {
-			cStatement = connection.prepareCall("CALL tax_cost_sp(?, ?, ?)");
-			cStatement.setString(1, state);
-			cStatement.setDouble(2, subtotal);
-			cStatement.registerOutParameter(3, Types.DOUBLE);
-			cStatement.executeQuery();
-			return cStatement.getDouble(3);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return 0.0;
-	}
-
-	public void addProduct(String productName, String productDescription, String filename, Double price,
-			Integer status) {
-		try {
-			cStatement = connection.prepareCall("CALL prod_add_sp(?, ?, ?, ?, ?)");
-			cStatement.setString(1, productName);
-			cStatement.setString(2, productDescription);
-			cStatement.setString(3, filename);
-			cStatement.setDouble(4, price);
-			cStatement.setInt(5, status);
-			cStatement.executeQuery();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public void addProduct(String productName, String productDescription, String filename, Double price, Integer status)
+			throws SQLException {
+		cStatement = connection.prepareCall("CALL prod_add_sp(?, ?, ?, ?, ?)");
+		cStatement.setString(1, productName);
+		cStatement.setString(2, productDescription);
+		cStatement.setString(3, filename);
+		cStatement.setDouble(4, price);
+		cStatement.setInt(5, status);
+		cStatement.executeQuery();
 	}
 
 	public List<String> getProductList() {
@@ -89,19 +100,15 @@ public class Model {
 			e.printStackTrace();
 		}
 
-		return null;
+		return array;
 	}
-	
-	public void updateProduct (String basketId, String date, String shipper, String shipNumber) {
-		try {
+
+	public void updateProduct(String basketId, Date date, String shipper, String shipNumber) throws SQLException {
 		cStatement = connection.prepareCall("CALL status_ship_sp(?, ?, ?, ?)");
 		cStatement.setString(1, basketId);
-		cStatement.setString(2, date);
+		cStatement.setDate(2, date);
 		cStatement.setString(3, shipper);
 		cStatement.setString(4, shipNumber);
 		cStatement.executeQuery();
-	} catch (SQLException e) {
-		e.printStackTrace();
-	}
 	}
 }
