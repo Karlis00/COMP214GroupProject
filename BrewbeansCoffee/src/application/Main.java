@@ -335,8 +335,6 @@ public class Main extends Application {
 		mainPane.add(txtPrice, 1, 3);
 		mainPane.add(txtStatus, 1, 4);
 		mainPane.add(btnAdd, 1, 5);
-		Text message = new Text();
-		mainPane.add(message, 1, 6);
 
 		btnAdd.setOnAction((event) -> {
 
@@ -348,10 +346,15 @@ public class Main extends Application {
 
 			try {
 				model.addProduct(productName, productDescription, filename, price, status);
-				message.setText("Update success!");
+
+				a.setAlertType(AlertType.INFORMATION);
+				a.setHeaderText("Update Success");
+				a.show();
 			} catch (SQLException e) {
 				e.printStackTrace();
-				message.setText(e.getMessage());
+				a.setAlertType(AlertType.ERROR);
+				a.setHeaderText(e.getMessage());
+				a.show();
 			}
 		});
 
