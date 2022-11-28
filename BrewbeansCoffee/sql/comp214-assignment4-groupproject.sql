@@ -1,6 +1,5 @@
 /*COMP214 - SEC.402
-  Name: Kit Yi Wan (Emily)
-  Student ID: 301221160
+  Name: Kit Yi Wan, Yuk Sing Cheung, Kam Hung Chan, Eman Shalabi
   Subject: Assignment 4 - Group Project*/
 
 /*Task 1*/
@@ -184,13 +183,13 @@ END;
 /*Report 1*/
 -- Procedure for checking whether all items in stock
 CREATE OR REPLACE PROCEDURE ck_instock_sp (
-    p_basketid IN bb_basketitem.idbasket%TYPE
+    p_basketid IN bb_basketitem.idbasket%TYPE,
+    p_msg OUT VARCHAR2
 ) IS
     CURSOR cur_basket IS
     SELECT bi.idbasket, bi.quantity, p.stock
     FROM bb_basketitem bi INNER JOIN bb_product p USING ( idproduct )
     WHERE bi.idbasket = p_basketid;
-
     lv_flag_txt CHAR(1) := 'Y';
 BEGIN
     FOR rec_basket IN cur_basket LOOP
@@ -207,7 +206,13 @@ BEGIN
     COMMIT;
 END ck_instock_sp;
 -- Testing
-EXECUTE ck_instock_sp(6);
+
+DECLARE
+    v_msg VARCHAR2(30);
+BEGIN
+    ck_instock_sp(6,v_msg);
+    dbms_output.put_line(v_msg);
+END;
 
 /*Report 2*/
 -- Function for calculating total spending
