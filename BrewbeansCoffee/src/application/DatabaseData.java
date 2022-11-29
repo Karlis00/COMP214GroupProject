@@ -11,8 +11,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class DatabaseData {
 
@@ -109,16 +113,16 @@ public class DatabaseData {
 		cStatement.executeQuery();
 	}
 
-	public List<String> getProductList() {
+	public ObservableList<TableModel> getProductList() {
 
-		List<String> array = new ArrayList<>();
+		ObservableList<TableModel> array = FXCollections.observableArrayList();
 
 		try {
-			String query = "Select * from BB_PRODUCT order by 1 desc";
+			String query = "Select IDPRODUCT, PRODUCTNAME, PRICE, PRODUCTIMAGE from BB_PRODUCT order by 1 desc";
 			resultSet = statement.executeQuery(query);
-			ResultSetMetaData metaData = resultSet.getMetaData();
+
 			while (resultSet.next()) {
-				array.add(resultSet.getObject(2).toString());
+				array.add(new TableModel(resultSet.getInt("IDPRODUCT"), resultSet.getString("PRODUCTNAME"), resultSet.getString("PRICE"), resultSet.getString("PRODUCTIMAGE")));
 			}
 			return array;
 		} catch (SQLException e) {
@@ -202,5 +206,32 @@ public void setProductDetail(String id, String des) {
 
 
 }
+
+public void addToBasket(int basketId, int productId, double price, int quantity, int size, int form) {
+try {
+		
+		cStatement = connection.prepareCall("CALL basket_add_sp(? ,? , ?, ?, ?, ?)");
+		cStatement.setInt(1, basketId);
+		cStatement.setInt(2, productId);
+		cStatement.setDouble(3, price);
+		cStatement.setInt(4, quantity);
+		cStatement.setInt(5, size);
+		cStatement.setInt(6, form);
+
+		cStatement.executeQuery();
+
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+}
+
+public String checkOnSales(int productId) throws SQLException {
+	cStatement = connection.prepareCall("CALL ck_sale_sf(? ,?)");
+	cStatement.setInt(1, productId);
+	cStatement.setObject(2, LocalDateTime.now());
+	resultSet = cStatement.executeQuery();
+	return resultSet.toString();
+	}
+
 
 }

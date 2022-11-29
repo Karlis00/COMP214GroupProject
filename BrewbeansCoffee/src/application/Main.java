@@ -26,6 +26,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -140,7 +141,17 @@ public class Main extends Application {
 					runUpdateStatus();
 					break;
 				case TASK_5:
-					runShowProduct();
+					try {
+						try {
+							runShowProduct();
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					break;
 				case REPORT_1:
 					runReport1();
@@ -423,24 +434,84 @@ public class Main extends Application {
 
 	}
 
-	private void runShowProduct() {
+	private void runShowProduct() throws FileNotFoundException, SQLException {
 		mainPane.getChildren().clear();
 
-		ListView<String> lstvCoffeeProduct = new ListView<String>();
-		mainPane.add(new Label("Coffee"), 0, 0);
-		mainPane.add(lstvCoffeeProduct, 0, 1);
+		TableView<TableModel> tbCoffeeProduct = new TableView<TableModel>();
+		tbCoffeeProduct.setMaxHeight(300);
+		TableColumn<TableModel, String> idCol = new TableColumn<>("ID");
+		idCol.setMinWidth(20);
+		idCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
+		TableColumn<TableModel, String> nameCol = new TableColumn<>("Product");
+		nameCol.setMinWidth(200);
+		nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tbCoffeeProduct.getColumns().addAll(idCol, nameCol);
+		
+		mainPane.add(new Label("Coffee"), 0, 0, 3, 1);
+		mainPane.add(tbCoffeeProduct, 0, 1, 1, 4);
 
-		lstvCoffeeProduct.getItems().addAll(data.getProductList());
+		tbCoffeeProduct.getItems().addAll(data.getProductList());
+		
+		mainPane.add(new Label("Quantity"), 1,2);
+		mainPane.add(new Label("Size"), 1,3);
+		mainPane.add(new Label("Form"),1,4);
+		TextField txtQuantity = new TextField();
+		TextField txtSize = new TextField();
+		TextField txtForm = new TextField();
+		mainPane.add(txtQuantity, 2,2);
+		mainPane.add(txtSize, 2,3);
+		mainPane.add(txtForm,2,4);
+		tbCoffeeProduct.getSelectionModel().selectFirst();
+
+//		String imgFile = "Banner.png";
+		Image coffeeImg = new Image(new FileInputStream("./src/" + tbCoffeeProduct.getSelectionModel().getSelectedItem().getImg()));
+		ImageView coffeeView = new ImageView(coffeeImg);
+		coffeeView.setFitHeight(180);
+		coffeeView.setFitWidth(180);
+		mainPane.add(coffeeView,1,1,2,1);
+//		Label lblSales = new Label(data.checkOnSales(tbCoffeeProduct.getSelectionModel().getSelectedItem().getProductId()));
+//		mainPane.add(lblSales,1,1,2,1);
+		
+		ComboBox cbBasketId = new ComboBox();
+		List<String> basketIdList = data.getBacketIdList();
+		cbBasketId.getItems().addAll(basketIdList);
+
+		mainPane.add(cbBasketId,1,5);
+		
+		Button btnToBasket = new Button("Add to Basket");
+		mainPane.add(btnToBasket,2,5);
+		
+		btnToBasket.setOnAction((event)->{
+			try {
+			data.addToBasket(Integer.parseInt(cbBasketId.getValue().toString()), 
+					tbCoffeeProduct.getSelectionModel().getSelectedItem().getProductId(), 
+					Double.parseDouble(tbCoffeeProduct.getSelectionModel().getSelectedItem().getPrice()),
+					Integer.parseInt(txtQuantity.getText()),
+					Integer.parseInt(txtSize.getText()),
+					Integer.parseInt(txtForm.getText()));
+			
+			a.setAlertType(AlertType.INFORMATION);
+			a.setHeaderText("You have updated the product successfully.");
+			a.show();
+		} catch (Exception e) {
+			e.printStackTrace();
+			a.setAlertType(AlertType.ERROR);
+			a.setHeaderText(e.getMessage());
+			a.show();
+		}
+			
+		});
+
 	}
 
 	private void runEditProduct() {
 		mainPane.getChildren().clear();
 
 		Button btnEdit = new Button("Update Product");
-		Button btnGetProduct = new Button("Search by ID");
+		Button btnGetProduct = new Button("Find");
 		mainPane.add(new Label("Product ID: "), 0, 0);
 		mainPane.add(new Label("Product Name: "), 0, 1);
-		mainPane.add(new Label("Product Description: "), 0, 2);
+		mainPane.add(new Label("Description: "), 0, 2);
 		TextField txtProductID = new TextField();
 		Label lblProductName = new Label();
 		TextArea txtProductDescription = new TextArea();
