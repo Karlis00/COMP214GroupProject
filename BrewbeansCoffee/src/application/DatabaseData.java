@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -21,6 +22,7 @@ public class DatabaseData {
 	Connection connection = null; // manages connection
 	Statement statement = null; // query statement
 	CallableStatement cStatement = null; // callable query statement
+	PreparedStatement pStatement = null; // prepared query statement
 	ResultSet resultSet = null; // manages results
 
 	public DatabaseData() throws ClassNotFoundException, SQLException {
@@ -160,4 +162,45 @@ public class DatabaseData {
 		return cStatement.getString(1);
 		
 	}
+
+
+public List<String> getProductDetail(String id) {
+
+	List<String> array = new ArrayList<>();
+
+	try {
+		pStatement = connection.prepareStatement("Select PRODUCTNAME, DESCRIPTION from BB_PRODUCT WHERE IDPRODUCT = ?");
+		pStatement.setString(1, id);
+
+		resultSet = pStatement.executeQuery();
+
+		while (resultSet.next()) {
+			array.add(resultSet.getObject(1).toString());
+			array.add(resultSet.getObject(2).toString());
+		}
+		return array;
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+
+	return array;
+}
+
+public void setProductDetail(String id, String des) {
+
+
+	try {
+		
+		cStatement = connection.prepareCall("CALL upd_description_sp(? ,?)");
+		cStatement.setInt(1, Integer.parseInt(id));
+		cStatement.setString(2, des);
+		cStatement.executeQuery();
+
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+
+
+}
+
 }

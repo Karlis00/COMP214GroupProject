@@ -442,20 +442,35 @@ public class Main extends Application {
 		mainPane.add(new Label("Product Name: "), 0, 1);
 		mainPane.add(new Label("Product Description: "), 0, 2);
 		TextField txtProductID = new TextField();
-		TextField txtProductName = new TextField();
+		Label lblProductName = new Label();
 		TextArea txtProductDescription = new TextArea();
 		txtProductDescription.setWrapText(true);
 
 		mainPane.add(txtProductID, 1, 0);
 		mainPane.add(btnGetProduct, 2, 0);
-		mainPane.add(txtProductName, 1, 1);
+		mainPane.add(lblProductName, 1, 1);
 		mainPane.add(txtProductDescription, 1, 2);
 
 		mainPane.add(btnEdit, 1, 3);
 		btnGetProduct.setOnAction((event) -> {
+			List<String>array = data.getProductDetail(txtProductID.getText());
+			lblProductName.setText(array.get(0));
+			txtProductDescription.setText(array.get(1));
 		});
 
 		btnEdit.setOnAction((event) -> {
+		
+			try {
+			data.setProductDetail(txtProductID.getText(), txtProductDescription.getText());
+			a.setAlertType(AlertType.INFORMATION);
+			a.setHeaderText("You have updated the product successfully.");
+			a.show();
+		} catch (Exception e) {
+			e.printStackTrace();
+			a.setAlertType(AlertType.ERROR);
+			a.setHeaderText(e.getMessage());
+			a.show();
+		}
 		});
 	}
 
