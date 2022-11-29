@@ -3,7 +3,10 @@ package application;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -13,6 +16,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -21,6 +25,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -438,8 +443,8 @@ public class Main extends Application {
 		mainPane.getChildren().clear();
 
 		TableView<TableModel> tbCoffeeProduct = new TableView<TableModel>();
-		tbCoffeeProduct.setMaxHeight(300);
-		TableColumn<TableModel, String> idCol = new TableColumn<>("ID");
+		tbCoffeeProduct.setMaxHeight(400);
+		TableColumn<TableModel, Integer> idCol = new TableColumn<>("ID");
 		idCol.setMinWidth(20);
 		idCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
 		TableColumn<TableModel, String> nameCol = new TableColumn<>("Product");
@@ -448,7 +453,7 @@ public class Main extends Application {
 		tbCoffeeProduct.getColumns().addAll(idCol, nameCol);
 		
 		mainPane.add(new Label("Coffee"), 0, 0, 3, 1);
-		mainPane.add(tbCoffeeProduct, 0, 1, 1, 4);
+		mainPane.add(tbCoffeeProduct, 0, 1, 1, 6);
 
 		tbCoffeeProduct.getItems().addAll(data.getProductList());
 		
@@ -463,23 +468,42 @@ public class Main extends Application {
 		mainPane.add(txtForm,2,4);
 		tbCoffeeProduct.getSelectionModel().selectFirst();
 
-//		String imgFile = "Banner.png";
-		Image coffeeImg = new Image(new FileInputStream("./src/" + tbCoffeeProduct.getSelectionModel().getSelectedItem().getImg()));
-		ImageView coffeeView = new ImageView(coffeeImg);
+		ImageView coffeeView = new ImageView();
 		coffeeView.setFitHeight(180);
-		coffeeView.setFitWidth(180);
+		coffeeView.setFitWidth(240);
 		mainPane.add(coffeeView,1,1,2,1);
-//		Label lblSales = new Label(data.checkOnSales(tbCoffeeProduct.getSelectionModel().getSelectedItem().getProductId()));
-//		mainPane.add(lblSales,1,1,2,1);
 		
+
+
+		
+		tbCoffeeProduct.setOnMouseClicked((event) -> {
+			try {
+				coffeeView.setImage(new Image(new FileInputStream("./src/" + tbCoffeeProduct.getSelectionModel().getSelectedItem().getImg())));
+				Label lblSales = new Label(data.checkOnSales(tbCoffeeProduct.getSelectionModel().getSelectedItem().getProductId()));
+				mainPane.add(lblSales,1,0,2,1);
+				GridPane.setHalignment(lblSales, HPos.RIGHT);
+				GridPane.setValignment(lblSales, VPos.BOTTOM);
+				lblSales.setTextFill(Color.DARKVIOLET);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		
+		mainPane.add(new Label("Select Bastket: "),1,5);
 		ComboBox cbBasketId = new ComboBox();
 		List<String> basketIdList = data.getBacketIdList();
 		cbBasketId.getItems().addAll(basketIdList);
 
-		mainPane.add(cbBasketId,1,5);
+		mainPane.add(cbBasketId,2,5);
 		
 		Button btnToBasket = new Button("Add to Basket");
-		mainPane.add(btnToBasket,2,5);
+		mainPane.add(btnToBasket,2,6);
+		
+		
 		
 		btnToBasket.setOnAction((event)->{
 			try {

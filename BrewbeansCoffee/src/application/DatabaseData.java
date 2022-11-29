@@ -13,6 +13,7 @@ import java.sql.Types;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import javafx.collections.FXCollections;
@@ -226,11 +227,13 @@ try {
 }
 
 public String checkOnSales(int productId) throws SQLException {
-	cStatement = connection.prepareCall("CALL ck_sale_sf(? ,?)");
-	cStatement.setInt(1, productId);
-	cStatement.setObject(2, LocalDateTime.now());
-	resultSet = cStatement.executeQuery();
-	return resultSet.toString();
+	pStatement = connection.prepareCall("SELECT ck_sale_sf(? ,?) FROM DUAL");
+	pStatement.setInt(1, productId);
+	Date now = new Date(Calendar.getInstance().getTimeInMillis());
+	pStatement.setDate(2, now);
+	resultSet = pStatement.executeQuery();
+	resultSet.next();
+	return resultSet.getObject(1).toString();
 	}
 
 
