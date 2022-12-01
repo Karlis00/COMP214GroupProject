@@ -292,7 +292,7 @@ public class Main extends Application {
 		column3.setMinWidth(30);
 		column3.setCellValueFactory(new PropertyValueFactory<>("quantity"));
 
-		TableColumn<TableModel, String> column4 = new TableColumn<>("Price");
+		TableColumn<TableModel, String> column4 = new TableColumn<>("Price ($)");
 		column4.setMinWidth(30);
 		column4.setCellValueFactory(new PropertyValueFactory<>("price"));
 
@@ -449,7 +449,7 @@ public class Main extends Application {
 		TableColumn<TableModel, String> nameCol = new TableColumn<>("Product");
 		nameCol.setMinWidth(200);
 		nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-		TableColumn<TableModel, Integer> priceCol = new TableColumn<>("Price");
+		TableColumn<TableModel, Integer> priceCol = new TableColumn<>("Price ($)");
 		priceCol.setMinWidth(20);
 		priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
 		tbCoffeeProduct.getColumns().addAll(idCol, nameCol, priceCol);
