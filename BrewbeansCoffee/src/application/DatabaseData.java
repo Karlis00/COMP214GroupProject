@@ -32,10 +32,27 @@ public class DatabaseData {
 
 	public DatabaseData() throws ClassNotFoundException, SQLException {
 		Class.forName(DRIVER);
-		connection = DriverManager.getConnection(DATABASE_URL, "COMP214_F22_er_53", "password");
+		connection = DriverManager.getConnection(DATABASE_URL, "COMP214_F22_er_57", "password");
 		statement = connection.createStatement();
 	}
 
+	public List<String> getProductIdList() {
+		List<String> array = new ArrayList<>();
+		try {
+			String query = "Select idproduct from bb_product order by 1";
+			resultSet = statement.executeQuery(query);
+			while (resultSet.next()) {
+				array.add(resultSet.getString(1));
+			}
+			return array;
+		}
+
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return array;
+	}
+	
 	public List<String> getBacketIdList() {
 		List<String> array = new ArrayList<>();
 		try {
@@ -52,6 +69,7 @@ public class DatabaseData {
 		}
 		return array;
 	}
+	
 	public List<String> getShopperIdList() {
 		List<String> array = new ArrayList<>();
 		try {
@@ -119,7 +137,7 @@ public class DatabaseData {
 		ObservableList<TableModel> array = FXCollections.observableArrayList();
 
 		try {
-			String query = "Select IDPRODUCT, PRODUCTNAME, PRICE, PRODUCTIMAGE from BB_PRODUCT order by 1 desc";
+			String query = "Select IDPRODUCT, PRODUCTNAME, PRICE, PRODUCTIMAGE from BB_PRODUCT order by 1";
 			resultSet = statement.executeQuery(query);
 
 			while (resultSet.next()) {

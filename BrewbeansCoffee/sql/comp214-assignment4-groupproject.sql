@@ -143,12 +143,51 @@ BEGIN
         p_size,
         p_form
     );
+    
+    basket_update_sp(p_basketid);
 
     COMMIT;
 END basket_add_sp;
 -- Testing
 SELECT * FROM bb_basketitem;
 EXECUTE basket_add_sp(14, 8, 10.80, 1, 2, 4);
+
+/*Task 5 - Extended*/
+-- Procedure for updating basket
+CREATE OR REPLACE PROCEDURE basket_update_sp (
+    p_basketid IN bb_basketitem.idbasket%TYPE
+) IS
+    CURSOR cur_basketitem IS
+    SELECT idbasket, price, quantity
+    FROM bb_basketitem
+    WHERE idbasket = p_basketid;
+    v_state bb_shopper.state%TYPE := '';
+    v_quantity bb_basket.quantity%TYPE := 0;
+    v_subtotal bb_basket.subtotal%TYPE := 0;
+    v_total bb_basket.total%TYPE := 0;
+    v_shipping bb_basket.shipping%TYPE := 0;
+    v_tax bb_basket.tax%TYPE := 0;
+BEGIN
+    FOR rec_basket IN cur_basketitem LOOP
+        v_quantity := v_quantity + rec_basket.quantity;
+        v_subtotal := v_subtotal + rec_basket.price;
+    END LOOP;
+    
+    SELECT fee INTO v_shipping FROM bb_shipping WHERE v_quantity BETWEEN low AND high;
+    SELECT state INTO v_state FROM bb_shopper JOIN bb_basket USING ( idshopper ) WHERE idbasket = p_basketid;
+    tax_cost_sp(v_state, v_subtotal, v_tax);
+    v_total := v_subtotal + v_shipping + v_tax;
+    
+    UPDATE bb_basket SET quantity = v_quantity, subtotal = v_subtotal, total = v_total, shipping = v_shipping, tax = v_tax WHERE idbasket = p_basketid;
+    
+    COMMIT;
+END basket_update_sp;
+-- Testing
+SELECT * FROM bb_basket;
+SELECT * FROM bb_basketitem;
+SELECT * FROM bb_shopper;
+SELECT * FROM bb_shipping;
+EXECUTE basket_update_sp(14);
 
 /*Task 6*/
 -- Function for identifying sale products
@@ -208,7 +247,6 @@ BEGIN
     COMMIT;
 END ck_instock_sp;
 -- Testing
-
 DECLARE
     v_msg VARCHAR2(30);
 BEGIN

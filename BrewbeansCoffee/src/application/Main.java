@@ -48,9 +48,9 @@ public class Main extends Application {
 	static final String TASK_1 = "Task 1: Update Product Description";
 	static final String TASK_2 = "Task 2: Add New Product";
 	static final String TASK_3 = "Task 3: Calculate Tax";
-	static final String TASK_4 = "Task 4: Update Shipping Status";
-	static final String TASK_5 = "Task 5/6: Add Basket & Check Sale";
-	static final String REPORT_1 = "Report 1: Check In Stock ";
+	static final String TASK_4 = "Task 4: Update Order Status";
+	static final String TASK_5 = "Task 5 & 6: Add To Basket & Check Sale Product";
+	static final String REPORT_1 = "Report 1: Check In Stock";
 	static final String REPORT_2 = "Report 2: Calculate Total Spending";
 
 	// create the pane
@@ -70,7 +70,7 @@ public class Main extends Application {
 		rowBanner.setPrefHeight(100);
 		pane.getRowConstraints().add(rowBanner);
 		ColumnConstraints columnLeft = new ColumnConstraints();
-		columnLeft.setPrefWidth(300);
+		columnLeft.setPrefWidth(450);
 		pane.getColumnConstraints().add(columnLeft);
 		ColumnConstraints columnRight = new ColumnConstraints();
 		columnRight.setPrefWidth(800);
@@ -192,7 +192,7 @@ public class Main extends Application {
 		TextField txtShipNumber = new TextField();
 
 		mainPane.add(txtState, 1, 0);
-		mainPane.add(new Text("(example: VA, NC, SC)"), 2, 0);
+		mainPane.add(new Text("(For example: VA, NC, SC)"), 2, 0);
 
 		mainPane.add(txtSubtotal, 1, 1);
 		mainPane.add(btnCal, 1, 3);
@@ -203,7 +203,7 @@ public class Main extends Application {
 				Double subtotal = Double.parseDouble(txtSubtotal.getText().trim());
 
 				a.setAlertType(AlertType.INFORMATION);
-				a.setHeaderText("Tax: " + data.getTaxCost(state, subtotal));
+				a.setHeaderText("Tax: $" + data.getTaxCost(state, subtotal));
 				a.show();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -242,7 +242,6 @@ public class Main extends Application {
 		ComboBox cbBasketId = new ComboBox();
 		List<String> basketIdList = data.getBacketIdList();
 		cbBasketId.getItems().addAll(basketIdList);
-		cbBasketId.setValue(basketIdList.isEmpty() ? "" : basketIdList.get(0));
 		// TextField txtBasketId = new TextField();
 
 		DatePicker datepicker = new DatePicker();
@@ -256,7 +255,7 @@ public class Main extends Application {
 		mainPane.add(cbBasketId, 1, 0);
 		mainPane.add(datepicker, 1, 1);
 		mainPane.add(txtShipper, 1, 2);
-		mainPane.add(new Text("(max: 5 character)"), 2, 2);
+		mainPane.add(new Text("(Max. 5 characters)"), 2, 2);
 
 		mainPane.add(txtShipNumber, 1, 3);
 		mainPane.add(btnAdd, 1, 4);
@@ -268,7 +267,7 @@ public class Main extends Application {
 						txtShipNumber.getText());
 
 				a.setAlertType(AlertType.INFORMATION);
-				a.setHeaderText("Update Success");
+				a.setHeaderText("The order status has been updated successfully.");
 				a.show();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -327,11 +326,11 @@ public class Main extends Application {
 		tableView.setEditable(true);
 		tableView.setMinWidth(300);
 
-		TableColumn<TableModel, String> column2 = new TableColumn<>("Shopper Id");
+		TableColumn<TableModel, String> column2 = new TableColumn<>("Shopper ID");
 		column2.setMinWidth(100);
 		column2.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-		TableColumn<TableModel, String> column4 = new TableColumn<>("Total Spending");
+		TableColumn<TableModel, String> column4 = new TableColumn<>("Total Spending ($)");
 		column4.setMinWidth(100);
 		column4.setCellValueFactory(new PropertyValueFactory<>("price"));
 
@@ -450,7 +449,10 @@ public class Main extends Application {
 		TableColumn<TableModel, String> nameCol = new TableColumn<>("Product");
 		nameCol.setMinWidth(200);
 		nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-		tbCoffeeProduct.getColumns().addAll(idCol, nameCol);
+		TableColumn<TableModel, Integer> priceCol = new TableColumn<>("Price");
+		priceCol.setMinWidth(20);
+		priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+		tbCoffeeProduct.getColumns().addAll(idCol, nameCol, priceCol);
 		
 		mainPane.add(new Label("Coffee"), 0, 0, 3, 1);
 		mainPane.add(tbCoffeeProduct, 0, 1, 1, 6);
@@ -459,7 +461,9 @@ public class Main extends Application {
 		
 		mainPane.add(new Label("Quantity"), 1,2);
 		mainPane.add(new Label("Size"), 1,3);
+		mainPane.add(new Text("(1 or 2)"), 3, 3);
 		mainPane.add(new Label("Form"),1,4);
+		mainPane.add(new Text("(3 or 4)"), 3, 4);
 		TextField txtQuantity = new TextField();
 		TextField txtSize = new TextField();
 		TextField txtForm = new TextField();
@@ -467,10 +471,11 @@ public class Main extends Application {
 		mainPane.add(txtSize, 2,3);
 		mainPane.add(txtForm,2,4);
 		tbCoffeeProduct.getSelectionModel().selectFirst();
-
+		
 		ImageView coffeeView = new ImageView();
 		coffeeView.setFitHeight(180);
 		coffeeView.setFitWidth(240);
+		coffeeView.setImage(new Image(new FileInputStream("./src/" + tbCoffeeProduct.getSelectionModel().getSelectedItem().getImg())));
 		mainPane.add(coffeeView,1,1,2,1);
 		
 
@@ -493,7 +498,7 @@ public class Main extends Application {
 			}
 		});
 		
-		mainPane.add(new Label("Select Bastket: "),1,5);
+		mainPane.add(new Label("Basket ID: "),1,5);
 		ComboBox cbBasketId = new ComboBox();
 		List<String> basketIdList = data.getBacketIdList();
 		cbBasketId.getItems().addAll(basketIdList);
@@ -515,7 +520,7 @@ public class Main extends Application {
 					Integer.parseInt(txtForm.getText()));
 			
 			a.setAlertType(AlertType.INFORMATION);
-			a.setHeaderText("You have updated the product successfully.");
+			a.setHeaderText("The product has been added to basket successfully.");
 			a.show();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -530,25 +535,28 @@ public class Main extends Application {
 
 	private void runEditProduct() {
 		mainPane.getChildren().clear();
+		
+		ComboBox cbProductId = new ComboBox();
+		List<String> productIdList = data.getProductIdList();
+		cbProductId.getItems().addAll(productIdList);
 
 		Button btnEdit = new Button("Update Product");
-		Button btnGetProduct = new Button("Find");
+		//Button btnGetProduct = new Button("Find");
 		mainPane.add(new Label("Product ID: "), 0, 0);
 		mainPane.add(new Label("Product Name: "), 0, 1);
 		mainPane.add(new Label("Description: "), 0, 2);
-		TextField txtProductID = new TextField();
+		//TextField txtProductID = new TextField();
 		Label lblProductName = new Label();
 		TextArea txtProductDescription = new TextArea();
 		txtProductDescription.setWrapText(true);
 
-		mainPane.add(txtProductID, 1, 0);
-		mainPane.add(btnGetProduct, 2, 0);
+		mainPane.add(cbProductId, 1, 0);
 		mainPane.add(lblProductName, 1, 1);
 		mainPane.add(txtProductDescription, 1, 2);
 
-		mainPane.add(btnEdit, 1, 3);
-		btnGetProduct.setOnAction((event) -> {
-			List<String>array = data.getProductDetail(txtProductID.getText());
+		//mainPane.add(btnEdit, 1, 3);
+		cbProductId.setOnAction((event) -> {
+			List<String>array = data.getProductDetail(cbProductId.getValue().toString());
 			lblProductName.setText(array.get(0));
 			txtProductDescription.setText(array.get(1));
 		});
@@ -556,9 +564,9 @@ public class Main extends Application {
 		btnEdit.setOnAction((event) -> {
 		
 			try {
-			data.setProductDetail(txtProductID.getText(), txtProductDescription.getText());
+			data.setProductDetail(cbProductId.getValue().toString(), txtProductDescription.getText());
 			a.setAlertType(AlertType.INFORMATION);
-			a.setHeaderText("You have updated the product successfully.");
+			a.setHeaderText("The product description has been updated successfully.");
 			a.show();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -574,7 +582,7 @@ public class Main extends Application {
 
 		Button btnAdd = new Button("Add Product");
 		mainPane.add(new Label("Product Name: "), 0, 0);
-		mainPane.add(new Label("Product Description: "), 0, 1);
+		mainPane.add(new Label("Description: "), 0, 1);
 		mainPane.add(new Label("Image Filename: "), 0, 2);
 		mainPane.add(new Label("Price: "), 0, 3);
 		mainPane.add(new Label("Status: "), 0, 4);
@@ -604,7 +612,7 @@ public class Main extends Application {
 				data.addProduct(productName, productDescription, filename, price, status);
 
 				a.setAlertType(AlertType.INFORMATION);
-				a.setHeaderText("Update Success");
+				a.setHeaderText("The new product has been added successfully.");
 				a.show();
 			} catch (SQLException e) {
 				e.printStackTrace();
