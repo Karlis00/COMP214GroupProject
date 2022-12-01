@@ -443,6 +443,7 @@ public class Main extends Application {
 
 		TableView<TableModel> tbCoffeeProduct = new TableView<TableModel>();
 		tbCoffeeProduct.setMaxHeight(400);
+		tbCoffeeProduct.setMaxWidth(297);
 		TableColumn<TableModel, Integer> idCol = new TableColumn<>("ID");
 		idCol.setMinWidth(20);
 		idCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
