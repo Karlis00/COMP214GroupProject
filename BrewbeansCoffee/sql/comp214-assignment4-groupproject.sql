@@ -161,25 +161,39 @@ CREATE OR REPLACE PROCEDURE basket_update_sp (
     SELECT idbasket, price, quantity
     FROM bb_basketitem
     WHERE idbasket = p_basketid;
-    v_state bb_shopper.state%TYPE := '';
+    v_state    bb_shopper.state%TYPE := '';
     v_quantity bb_basket.quantity%TYPE := 0;
     v_subtotal bb_basket.subtotal%TYPE := 0;
-    v_total bb_basket.total%TYPE := 0;
+    v_total    bb_basket.total%TYPE := 0;
     v_shipping bb_basket.shipping%TYPE := 0;
-    v_tax bb_basket.tax%TYPE := 0;
+    v_tax      bb_basket.tax%TYPE := 0;
 BEGIN
     FOR rec_basket IN cur_basketitem LOOP
         v_quantity := v_quantity + rec_basket.quantity;
         v_subtotal := v_subtotal + rec_basket.price;
     END LOOP;
-    
-    SELECT fee INTO v_shipping FROM bb_shipping WHERE v_quantity BETWEEN low AND high;
-    SELECT state INTO v_state FROM bb_shopper JOIN bb_basket USING ( idshopper ) WHERE idbasket = p_basketid;
+
+    SELECT fee
+    INTO v_shipping
+    FROM bb_shipping
+    WHERE v_quantity BETWEEN low AND high;
+
+    SELECT state
+    INTO v_state
+    FROM bb_shopper
+        JOIN bb_basket USING ( idshopper )
+    WHERE idbasket = p_basketid;
+
     tax_cost_sp(v_state, v_subtotal, v_tax);
     v_total := v_subtotal + v_shipping + v_tax;
-    
-    UPDATE bb_basket SET quantity = v_quantity, subtotal = v_subtotal, total = v_total, shipping = v_shipping, tax = v_tax WHERE idbasket = p_basketid;
-    
+    UPDATE bb_basket
+    SET quantity = v_quantity,
+        subtotal = v_subtotal,
+        total = v_total,
+        shipping = v_shipping,
+        tax = v_tax
+    WHERE idbasket = p_basketid;
+
     COMMIT;
 END basket_update_sp;
 -- Testing
@@ -281,7 +295,14 @@ EXCEPTION
         RETURN v_total;
 END tot_purch_sf;
 -- Full List
-SELECT bb_shopper.idshopper, SUM(bb_basket.total) AS Total FROM bb_shopper LEFT JOIN bb_basket ON bb_shopper.idshopper = bb_basket.idshopper GROUP BY bb_shopper.idshopper;
+SELECT
+    bb_shopper.idshopper,
+    SUM(bb_basket.total) AS total
+FROM
+    bb_shopper
+    LEFT JOIN bb_basket ON bb_shopper.idshopper = bb_basket.idshopper
+GROUP BY
+    bb_shopper.idshopper;
 -- Testing
 SELECT * FROM bb_shopper;
 SELECT * FROM bb_basket;
