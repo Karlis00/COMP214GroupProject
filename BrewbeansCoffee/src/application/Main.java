@@ -555,7 +555,7 @@ public class Main extends Application {
 		mainPane.add(lblProductName, 1, 1);
 		mainPane.add(txtProductDescription, 1, 2);
 
-		//mainPane.add(btnEdit, 1, 3);
+		mainPane.add(btnEdit, 1, 3);
 		cbProductId.setOnAction((event) -> {
 			List<String>array = data.getProductDetail(cbProductId.getValue().toString());
 			lblProductName.setText(array.get(0));
