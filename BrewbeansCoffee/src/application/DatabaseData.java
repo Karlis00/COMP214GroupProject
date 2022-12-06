@@ -32,7 +32,7 @@ public class DatabaseData {
 
 	public DatabaseData() throws ClassNotFoundException, SQLException {
 		Class.forName(DRIVER);
-		connection = DriverManager.getConnection(DATABASE_URL, "COMP214_F22_er_57", "password");
+		connection = DriverManager.getConnection(DATABASE_URL, "COMP214_F22_er_53", "password");
 		statement = connection.createStatement();
 	}
 

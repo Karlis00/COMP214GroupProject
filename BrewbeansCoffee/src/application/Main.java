@@ -478,18 +478,25 @@ public class Main extends Application {
 		coffeeView.setFitWidth(240);
 		coffeeView.setImage(new Image(new FileInputStream("./src/" + tbCoffeeProduct.getSelectionModel().getSelectedItem().getImg())));
 		mainPane.add(coffeeView,1,1,2,1);
-		
-
+		Label lblSales = new Label();
+		mainPane.add(lblSales,1,0,2,1);
+		GridPane.setHalignment(lblSales, HPos.RIGHT);
+		GridPane.setValignment(lblSales, VPos.BOTTOM);
 
 		
 		tbCoffeeProduct.setOnMouseClicked((event) -> {
 			try {
 				coffeeView.setImage(new Image(new FileInputStream("./src/" + tbCoffeeProduct.getSelectionModel().getSelectedItem().getImg())));
-				Label lblSales = new Label(data.checkOnSales(tbCoffeeProduct.getSelectionModel().getSelectedItem().getProductId()));
-				mainPane.add(lblSales,1,0,2,1);
-				GridPane.setHalignment(lblSales, HPos.RIGHT);
-				GridPane.setValignment(lblSales, VPos.BOTTOM);
+				lblSales.setText("");
+				lblSales.setText(data.checkOnSales(tbCoffeeProduct.getSelectionModel().getSelectedItem().getProductId()));
+
+				if (lblSales.getText().equalsIgnoreCase("ON SALE!")) {
+					lblSales.setTextFill(Color.RED);
+					}
+				else
+				{
 				lblSales.setTextFill(Color.DARKVIOLET);
+				}
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
