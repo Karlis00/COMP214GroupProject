@@ -1,5 +1,5 @@
 /*COMP214 - SEC.402
-  Name: Kit Yi Wan, Yuk Sing Cheung, Kam Hung Chan, Eman Shalabi
+  Name: Kit Yi Wan, Yuk Sing Cheung, Kam Hung Chan
   Subject: Assignment 4 - Group Project*/
 
 /*Task 1*/
@@ -143,8 +143,6 @@ BEGIN
         p_size,
         p_form
     );
-    
-    basket_update_sp(p_basketid);
 
     COMMIT;
 END basket_add_sp;
@@ -274,25 +272,20 @@ CREATE OR REPLACE FUNCTION tot_purch_sf (
     p_shopperid IN bb_shopper.idshopper%TYPE
 ) RETURN NUMBER IS
     v_total bb_basket.total%TYPE;
-    e_invalid_shopperid EXCEPTION;
 BEGIN
     SELECT SUM(bb_basket.total)
     INTO v_total
     FROM bb_shopper
-        JOIN bb_basket ON bb_shopper.idshopper = bb_basket.idshopper
-    WHERE bb_shopper.idshopper = p_shopperid;
+        FULL OUTER JOIN bb_basket ON bb_shopper.idshopper = bb_basket.idshopper
+    WHERE bb_shopper.idshopper = p_shopperid
+    AND bb_basket.orderplaced = 1;
     
     IF v_total IS NULL THEN
-        RAISE e_invalid_shopperid;
+        v_total:=0;
     END IF;
     
     RETURN v_total;
     COMMIT;
-EXCEPTION
-    WHEN e_invalid_shopperid THEN
-        dbms_output.put_line('Error: Please input valid ShopperID');
-        v_total := 0;
-        RETURN v_total;
 END tot_purch_sf;
 -- Full List
 SELECT
@@ -300,7 +293,7 @@ SELECT
     SUM(bb_basket.total) AS total
 FROM
     bb_shopper
-    LEFT JOIN bb_basket ON bb_shopper.idshopper = bb_basket.idshopper
+    FULL OUTER JOIN bb_basket ON bb_shopper.idshopper = bb_basket.idshopper
 GROUP BY
     bb_shopper.idshopper;
 -- Testing
@@ -308,5 +301,5 @@ SELECT * FROM bb_shopper;
 SELECT * FROM bb_basket;
 BEGIN
     dbms_output.put_line(tot_purch_sf(21));
-    dbms_output.put_line(tot_purch_sf(1));
+    dbms_output.put_line(tot_purch_sf(26));
 END;
